@@ -1,7 +1,8 @@
 /*******************************************************************************************************************************
 Hashtable Implementation (STsize = 1000)
-Programmer : Choi, Ewha
-Date: 3/ 21/ 2023
+Programmer : Kang Mina, Lim Chaemin, Lim Eunjee, Nafisa
+Date: 3/ 18/ 2024
+
 Description :
 The input to the program is a file , consisting of identifiers seperated by
 spaces,tab characters, newlines and punctuation marks . , , , ; , :, ? , ! .
@@ -42,8 +43,8 @@ seperators - null , . ; : ? ! \t \n
 #define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'z') )
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
-//
-typedef struct HTentry* HTpointer;
+
+typedef struct HTentry *HTpointer;
 typedef struct HTentry {
 	int index; //index of identifier in ST
 	HTpointer next; //pointer to next identifier
@@ -57,20 +58,45 @@ char seperators[] = " .,;:?!\t\n";
 HTpointer HT[HTsize];
 char ST[STsize];
 
-// more global variables…
+int nextid = 0;
+int nextfree = 0;
+int hashcode;
+int sameid;
+
+int found; //for the previos occurence of identifier'
+
 ERRORtypes err;
 FILE* fp; //to be a pointer to FILE
 char input;
+
 //Initialize - open input file
 void initialize()
 {
 	fp = fopen(FILE_NAME, "r");
 	input = fgetc(fp);
 }
+int IsSeperators(char c)
+{
+	int sep_len;
+
+	sep_len = strlen(seperators);
+	for (int i; i < sep_len; i++) {
+		if (c == seperators[i])
+			return 1; //seperators 인 경우
+	}
+	return 0; // seperators가 아닌 경우
+}
 // Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
 // if illegal seperators,print out error message.
-void SkipSeperators()
+void SkipSeperators(char c)
 {
+	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		if (!IsSeperators(input)) {
+			err = illsp;
+			PrintError(err);
+		}
+		input = fgetc(fp);
+	}
 }
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
 // associated with each hashcode,but only for non-empty lists.
@@ -85,6 +111,25 @@ void PrintHStable()
 // illsp :illegal seperator
 void PrintError(ERRORtypes err)
 {
+	switch (err) {
+	case overst:
+		printf("Overflow in ST\n");
+		abort();
+		PrintHStable();
+		exit(0);
+		break;
+	case illid:
+		printf("illigal seperator");
+		while (input != EOF && (isLetter(input) || isDigit(input))) {
+			printf("%c", input);
+			input = fgetc(fp);
+		}
+		printf("start with digit \n");
+		break;
+	case illsp:
+		printf("%c is illegal seperator\n", input);
+		break;
+	}
 }
 //ReadIO - Read identifier from the input file the string table ST directly into
 // ST(append it to the previous identifier).
