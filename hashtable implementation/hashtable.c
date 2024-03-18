@@ -35,7 +35,7 @@ seperators - null , . ; : ? ! \t \n
 #include <stdlib.h>
 #include <string.h>
 
-#define FILE_NAME "testdata1.txt"
+#define FILE_NAME "testdata4.txt" //name of test data file(.txt) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -43,7 +43,7 @@ seperators - null , . ; : ? ! \t \n
 #define FALSE 0
 #define TRUE 1
 
-#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'z') )
+#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z') )
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
 
@@ -117,7 +117,7 @@ void PrintHStable()
 
 // PrintError - Print out error messages
 // overst : overflow in ST
-// print the hashtable and abort by calling the function "abort()".
+// print the hashtable and terminate by calling the function "exit(0)".
 // illid : illegal identifier
 // illsp :illegal seperator
 void PrintError(ERRORtypes err)
@@ -232,6 +232,7 @@ void ADDHT(int hscode)
 	HT[hscode] = ptr;
 }
 
+//PrintTeam - Print a team members.
 void PrintTeam() {
 	printf("1976002 °­¹Î¾Æ, 1976333 ÀÓÃ¤¹Î, 1985086 ÀÓÀºÁö, 1971091 Nafisa");
 }
