@@ -166,11 +166,6 @@ void SkipSeperators()
 void ReadID()
 {
 	nextid = nextfree;
-	if (strlen(input) > 12) { //12자 이내
-		err = toolong;
-		PrintError(err);
-	}
-	else {
 		if (isDigit(input)) { //숫자로 시작하는지 체크
 			err = illid; // 숫자로 시작하면 isDigit 뱉음
 			PrintError(err);
@@ -185,7 +180,7 @@ void ReadID()
 				input = fgetc(fp);
 			}
 		}
-	}
+	
 }
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
