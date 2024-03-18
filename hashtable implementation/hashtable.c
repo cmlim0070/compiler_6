@@ -43,7 +43,7 @@ seperators - null , . ; : ? ! \t \n
 #define FALSE 0
 #define TRUE 1
 
-#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))
+#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z') || ((x) == '_'))
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
 typedef struct HTentry *HTpointer;
@@ -70,6 +70,15 @@ int found; //for the previos occurence of identifier
 ERRORtypes err;
 FILE* fp; //to be a pointer to FILE
 char input;
+
+//PrintHeading - Print heading
+void PrintHeading() {
+	printf("\n [[ CURRENT FILE ]]\n %\s\n\n\n\n", FILE_NAME);
+	printf(" [[ STRING TABLE ]]\n");
+	printf(" -------------- ------------\n");
+	printf(" Index in ST	identifier\n");
+	printf(" -------------- ------------\n");
+}
 
 //Initialize - open input file
 //read one character from file
@@ -100,7 +109,7 @@ void PrintHStable()
 	int i, j;
 	HTpointer here;
 
-	printf("\n\n\n\n\n [[ HASH TABLE ]] \n\n");
+	printf("\n\n\n [[ HASH TABLE ]] \n\n");
 
 	for (i = 0; i < HTsize; i++)
 		if (HT[i] != NULL) {
@@ -113,7 +122,7 @@ void PrintHStable()
 			}
 			printf("\n");
 		}
-	printf("\n\n\n < %5d characters are used in the string table > \n", nextfree);
+	printf("\n < %5d characters are used in the string table > \n", nextfree);
 }
 
 // PrintError - Print out error messages
@@ -126,12 +135,12 @@ void PrintError(ERRORtypes err)
 {
 	switch (err) {
 	case overst:
-		printf("...ERROR...		OVERFLOW\n");
+		printf(" ...ERROR...		OVERFLOW\n");
 		PrintHStable();
 		exit(0);
 		break;
 	case illid:
-		printf("...ERROR...	");
+		printf(" ...ERROR...	");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
 			input = fgetc(fp);
@@ -139,7 +148,7 @@ void PrintError(ERRORtypes err)
 		printf("	start with digit \n");
 		break;
 	case illsp:
-		printf("...ERROR...	");
+		printf(" ...ERROR...	");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
 			input = fgetc(fp);
@@ -157,10 +166,8 @@ void PrintError(ERRORtypes err)
 // if illegal seperators, print out error message.
 void SkipSeperators()
 {
-	while (input != EOF && !(isLetter(input) || isDigit(input))) {
-		//if EOF도 아니고 letters와 digit도 아닐 때
-		if (!IsSeperators(input)) {
-			//
+	while (input != EOF && !(isLetter(input) || isDigit(input))) { //EOF도 아니고 letters와 digit도 아닐 때
+		if (!IsSeperators(input)) { //
 			err = illsp;
 			PrintError(err);
 		}
@@ -212,8 +219,8 @@ void ComputeHS(int nid, int nfree)
 
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
 // of the identifier.If find a match, set the found flag as true.
-// Otherwise flase.
-// If find a match, save the starting index of ST in same id. 안녕
+// Otherwise false.
+// If find a match, save the starting index of ST in same id. 
 void LookupHS(int nid, int hscode)
 {
 	HTpointer here;
@@ -228,8 +235,8 @@ void LookupHS(int nid, int hscode)
 			j = nid;
 			sameid = i;
 
-			while (ST[i] != '\0' && ST[i] != '\0' && found == TRUE) {
-				if (ST[i] != ST[i])
+			while (ST[i] != '\0' && ST[j] != '\0' && found == TRUE) {
+				if (ST[i] != ST[j])
 					found = FALSE;
 				else {
 					i++;
@@ -257,14 +264,8 @@ void ADDHT(int hscode)
 
 //PrintTeam - Print a team members.
 void PrintTeam() {
-	printf("1976002 강민아, 1976333 임채민, 1985086 임은지, 1971091 Nafisa");
-}
-
-//PrintHeading - Print heading
-void PrintHeading() {
-	printf("-------------- ------------\n");
-	printf("Index in ST	identifier\n");
-	printf("-------------- ------------\n");
+	printf("\n\n\n [[ 컴파일러 6조 ]]");
+	printf("\n 1976002 강민아, 1976333 임채민, 1985086 임은지, 1971091 Nafisa\n\n");
 }
 
 /*
@@ -298,14 +299,14 @@ int main()
 			LookupHS(nextid, hashcode);
 
 			if (!found) {
-				printf("%6d		", nextid);
+				printf(" %6d		", nextid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
 				printf("	(entered)\n");
 				ADDHT(hashcode);
 			}
 			else {
-				printf("%6d		", sameid);
+				printf(" %6d		", sameid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
 				printf("	(already existed)\n");
