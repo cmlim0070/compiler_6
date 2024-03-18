@@ -1,7 +1,8 @@
 /*******************************************************************************************************************************
 Hashtable Implementation (STsize = 1000)
-Programmer : Choi, Ewha
-Date: 3/ 21/ 2023
+Programmer : Kang Mina, Lim Chaemin, Lim Eunjee, Nafisa
+Date: 3/ 18/ 2024
+
 Description :
 The input to the program is a file , consisting of identifiers seperated by
 spaces,tab characters, newlines and punctuation marks . , , , ; , :, ? , ! .
@@ -42,7 +43,8 @@ seperators - null , . ; : ? ! \t \n
 #define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'z') )
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
-typedef struct HTentry* HTpointer;
+
+typedef struct HTentry *HTpointer;
 typedef struct HTentry {
 	int index; //index of identifier in ST
 	HTpointer next; //pointer to next identifier
@@ -56,7 +58,13 @@ char seperators[] = " .,;:?!\t\n";
 HTpointer HT[HTsize];
 char ST[STsize];
 
-// more global variables��
+int nextid = 0;
+int nextfree = 0;
+int hashcode;
+int sameid;
+
+int found; //for the previos occurence of identifier'
+
 ERRORtypes err;
 FILE* fp; //to be a pointer to FILE
 char input;
@@ -68,10 +76,30 @@ void initialize()
 	input = fgetc(fp);
 }
 
+int IsSeperators(char c)
+{
+	int sep_len;
+
+	sep_len = strlen(seperators);
+	for (int i; i < sep_len; i++) {
+		if (c == seperators[i])
+			return 1; //seperators ÀÎ °æ¿ì
+	}
+	return 0; // seperators°¡ ¾Æ´Ñ °æ¿ì
+}
+
+
 // Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
 // if illegal seperators,print out error message.
-void SkipSeperators()
+void SkipSeperators(char c)
 {
+	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		if (!IsSeperators(input)) {
+			err = illsp;
+			PrintError(err);
+		}
+		input = fgetc(fp);
+	}
 }
 
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
@@ -105,6 +133,25 @@ void PrintHStable()
 // illsp :illegal seperator
 void PrintError(ERRORtypes err)
 {
+	switch (err) {
+	case overst:
+		printf("Overflow in ST\n");
+		abort();
+		PrintHStable();
+		exit(0);
+		break;
+	case illid:
+		printf("illigal seperator");
+		while (input != EOF && (isLetter(input) || isDigit(input))) {
+			printf("%c", input);
+			input = fgetc(fp);
+		}
+		printf("start with digit \n");
+		break;
+	case illsp:
+		printf("%c is illegal seperator\n", input);
+		break;
+	}
 }
 //ReadIO - Read identifier from the input file the string table ST directly into
 // ST(append it to the previous identifier).
@@ -112,32 +159,12 @@ void PrintError(ERRORtypes err)
 // If first letter is digit, print out error message.
 void ReadID()
 {
-	nextid = nextfree;
-	if (isDigit(input)) {
-		err = illid;
-		PrintError(err);
-	}
-	else {
-		while (input != EOF && (isLetter(input) || isDigit(input))) {
-			if (nextfree == STsize) {
-				err = overst;
-				Printerr(err);
-			}
-			ST[nextfree++] = input;
-			input = fgetc(fp);
-		}
-	}
 }
 
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
 void ComputeHS(int nid, int nfree)
 {
-	int code, i;
-	code = 0;
-	for (i = nid; < nfree - 1; i++)
-		code += (int)ST[i];
-	hashcode = code % HTsize;
 }
 
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
@@ -146,28 +173,6 @@ void ComputeHS(int nid, int nfree)
 // If find a match, save the starting index of ST in same id.
 void LookupHS(int nid, int hscode)
 {
-	HTpointer here;
-	int i, j;
-	found = FALSE;
-	if (HT[hscode] != NULL) {
-		here = HT[hscode];
-		while (here != NULL && found == FALSE) {
-			found = TRUE;
-			i = here->index;
-			j = nid;
-			sameid = i;
-
-			while (ST[i] != '\0' && ST[i] != '\0' && found == TRUE) {
-				if (ST[i] != ST[i])
-					found = FALSE;
-				else {
-					i++;
-					j++;
-				}
-			}
-			here = here -> next;
-		}
-	}
 }
 
 // ADDHT - Add a new identifier to the hash table.
@@ -176,12 +181,6 @@ void LookupHS(int nid, int hscode)
 // IF list head is not a null , it adds a new identifier to the head of the chain
 void ADDHT(int hscode)
 {
-	HTpointer ptr;
-
-	ptr = (HTpointer)malloc(sizeof(ptr));
-	ptr->index = nextid;
-	ptr->next = HT[hscode];
-	HT[hscode] = ptr;
 }
 
 /*
