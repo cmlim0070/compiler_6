@@ -32,7 +32,7 @@ seperators - null , . ; : ? ! \t \n
 #include <stdlib.h>
 #include <string.h>
 
-#define FILE_NAME "testdata.txt"
+#define FILE_NAME "testdata2.txt"
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -81,25 +81,11 @@ int IsSeperators(char c)
 	int sep_len;
 
 	sep_len = strlen(seperators);
-	for (int i; i < sep_len; i++) {
+	for (int i=0; i < sep_len; i++) {
 		if (c == seperators[i])
-			return 1; //seperators ?Î °æ¿ì
+			return 1; // valid seperators 
 	}
-	return 0; // seperators°¡ ¾Æ´Ñ °æ¿ì
-}
-
-
-// Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
-// if illegal seperators,print out error message.
-void SkipSeperators(char c)
-{
-	while (input != EOF && !(isLetter(input) || isDigit(input))) {
-		if (!IsSeperators(input)) {
-			err = illsp;
-			PrintError(err);
-		}
-		input = fgetc(fp);
-	}
+	return 0; // invalid seperators
 }
 
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
@@ -153,6 +139,21 @@ void PrintError(ERRORtypes err)
 		break;
 	}
 }
+
+
+// Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
+// if illegal seperators,print out error message.
+void SkipSeperators()
+{
+	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		if (!IsSeperators(input)) {
+			err = illsp;
+			PrintError(err);
+		}
+		input = fgetc(fp);
+	}
+}
+
 //ReadIO - Read identifier from the input file the string table ST directly into
 // ST(append it to the previous identifier).
 // An identifier is a string of letters and digits, starting with a letter.
@@ -168,7 +169,7 @@ void ReadID()
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			if (nextfree == STsize) {
 				err = overst;
-				Printerr(err);
+				PrintError(err);
 			}
 			ST[nextfree++] = input;
 			input = fgetc(fp);
@@ -181,7 +182,7 @@ void ComputeHS(int nid, int nfree)
 {
 	int code, i;
 	code = 0;
-	for (i = nid; < nfree - 1; i++)
+	for (i = nid; i< nfree - 1; i++)
 		code += (int)ST[i];
 	hashcode = code % HTsize;
 }
@@ -214,6 +215,7 @@ void LookupHS(int nid, int hscode)
 		}
 	}
 }
+
 // ADDHT - Add a new identifier to the hash table.
 // If list head ht[hashcode] is null, simply add a list element with
 // starting index of the identifier in ST.
@@ -241,7 +243,6 @@ Print out the hashtable, and number of characters used up in ST
 int main()
 {
 	int i;
-	PrintHeading();
 	initialize();
 	while (input != EOF) {
 		err = noerror;
