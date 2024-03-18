@@ -35,7 +35,7 @@ seperators - null , . ; : ? ! \t \n
 #include <stdlib.h>
 #include <string.h>
 
-#define FILE_NAME "testdata2.txt"
+#define FILE_NAME "testdata1.txt"
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -125,7 +125,6 @@ void PrintError(ERRORtypes err)
 	switch (err) {
 	case overst:
 		printf("Overflow in ST\n");
-		abort();
 		PrintHStable();
 		exit(0);
 		break;
@@ -233,9 +232,8 @@ void ADDHT(int hscode)
 	HT[hscode] = ptr;
 }
 
-void PrintSTable()
-{
-	printf("")
+void PrintTeam() {
+	printf("1976002 ∞≠πŒæ∆, 1976333 ¿”√§πŒ, 1985086 ¿”¿∫¡ˆ, 1971091 Nafisa");
 }
 
 /*
@@ -258,20 +256,30 @@ int main()
 		ReadID();
 		if (input != EOF && err != illid) {
 			if (nextfree == STsize) {
-				// print error message
+				err = overst;
+				PrintError(err);
 			}
 			ST[nextfree++] = '\0';
+
 			ComputeHS(nextid, nextfree);
 			LookupHS(nextid, hashcode);
+
 			if (!found) {
-				// print message
+				printf("%6d		", nextid);
+				for (i = nextid; i < nextfree - 1; i++)
+					printf("%c", ST[i]);
+				printf("	(entered)\n");
 				ADDHT(hashcode);
 			}
 			else {
-				// print message
+				printf("%6d		", sameid);
+				for (i = nextid; i < nextfree - 1; i++)
+					printf("%c", ST[i]);
+				printf("	(already existed)\n");
+				nextfree = nextid;
 			}
 		}
 	}
-	PrintSTable();
 	PrintHStable();
+	PrintTeam();
 }
