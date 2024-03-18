@@ -10,10 +10,12 @@ An identifier is a string of letters and digits,starting with a letter.Case is i
 :
 If the ST overflows,prints the hashtable as above and abort by calling
 the function "exit()".
+
 Input :
 A file consisting of identifiers seperated by spaces, tab characters,newlines and
 punctuation marks.
 An identifier is a string of letters and digits,starting with a letter.
+
 Output :
 The identifier,its index in the stringtable and whether entered or present.
 Prints error message for illegal identifier(starting with a digit),illegal seperator and
@@ -21,6 +23,7 @@ Prints error message for illegal identifier(starting with a digit),illegal seper
 Restriction:
 If the ST overflows, print the hashtable as above, and abort by calling
 the function "exit()". "exit()" terminates the execution of a program.
+
 Global variables :
 ST - Array of string table
 HT - Array of list head of hashtable
@@ -230,6 +233,11 @@ void ADDHT(int hscode)
 	HT[hscode] = ptr;
 }
 
+void PrintSTable()
+{
+	printf("")
+}
+
 /*
 *  MAIN - Read the identifier from the file directly into ST.
 Compute its hashcode.
@@ -264,5 +272,6 @@ int main()
 			}
 		}
 	}
+	PrintSTable();
 	PrintHStable();
 }
