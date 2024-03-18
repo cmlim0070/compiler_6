@@ -34,8 +34,9 @@ seperators - null , . ; : ? ! \t \n
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#pragma warning(disable:4996)
 
-#define FILE_NAME "testdata5.txt" // name of test data file(.txt format) to run
+#define FILE_NAME "testdata44.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 // size of string table
 #define HTsize 100 // size of hash table
@@ -65,8 +66,7 @@ int nextfree = 0;	// the next available index of ST
 int hashcode;		// hash code of identifier
 int sameid;		// first index of identifier
 
-int len;	// to check the length of the identifier -> toolong err
-int found; // for the previos occurence of identifier
+int found; //for the previos occurence of identifier
 
 ERRORtypes err;
 FILE* fp; // to be a pointer to FILE
@@ -74,7 +74,7 @@ char input;
 
 // PrintHeading - Print heading
 void PrintHeading() {
-	printf("\n [[ CURRENT FILE ]]\n %\s\n\n\n\n", FILE_NAME);
+	printf("\n [[ CURRENT FILE ]]\n %s\n\n\n\n", FILE_NAME);
 	printf(" [[ STRING TABLE ]]\n");
 	printf(" -------------- ------------\n");
 	printf(" Index in ST	identifier\n");
@@ -141,29 +141,32 @@ void PrintError(ERRORtypes err)
 		exit(0);
 		break;
 	case illid:
-		printf(" ...ERROR...	");
+		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
 			input = fgetc(fp);
 		}
-		printf("	start with digit \n");
+		printf("\t\tstart with digit \n");
 		break;
 	case illsp:
-		printf(" ...ERROR...	");
+		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
-			printf("%c", input);
 			input = fgetc(fp);
 		}
 //		printf("	%c is not allowed \n", input);
 		printf("%c	invalid seperator \n", input);
 		break;
 	case toolong:
-		printf(" ...ERROR...	");
-		for (int i = nextid; i <= nextfree; i++) {
-			printf("%c", ST[i]);
+		printf(" ...ERROR...\t");
+		int length = 12;
+		int i = 0;
+		while (input != EOF && !(IsSeperators(input)) && (isLetter(input) || isDigit(input))) {
+			ST[nextfree++] = input;
+			input = fgetc(fp);
+			length++;
 		}
-		nextfree = nextid;
-		printf("	too long identifier\n");
+		printf("%.*s", nextfree - nextid, &ST[nextid]);
+		printf("\ttoo long identifier\n");
 		break;
 	}
 }
@@ -173,8 +176,10 @@ void PrintError(ERRORtypes err)
 // if illegal seperators, print out error message.
 void SkipSeperators()
 {
-	while (input != EOF && !(isLetter(input) || isDigit(input))) { // EOF도 아니고 letters와 digit도 아닐 때
-		if (!IsSeperators(input)) { // seperator 조차 아닌 경우
+	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		//if EOF도 아니고 letters와 digit도 아닐 때
+		if (!IsSeperators(input)) {
+			//
 			err = illsp;
 			PrintError(err);
 		}
@@ -189,7 +194,6 @@ void SkipSeperators()
 void ReadID()
 {
 	nextid = nextfree;
-	len = 0;
 
 	if (isDigit(input)) { // 숫자로 시작하는지 체크
 		err = illid; 
@@ -202,16 +206,9 @@ void ReadID()
 				PrintError(err);
 			}
 			ST[nextfree++] = input;
-			len++;
 			input = fgetc(fp);
 		}
-
-		if (len >= 12) {
-			err = toolong;
-			PrintError(err);
-			return;
-		}
-	}	
+	}
 }
 
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
@@ -220,7 +217,7 @@ void ComputeHS(int nid, int nfree)
 {
 	int code, i;
 	code = 0;
-	for (i = nid; i< nfree - 1; i++)
+	for (i = nid; i < nfree - 1; i++)
 		code += (int)ST[i];
 	hashcode = code % HTsize;
 }
@@ -264,7 +261,7 @@ void ADDHT(int hscode)
 {
 	HTpointer ptr;
 
-	ptr = (HTpointer)malloc(sizeof(ptr));
+	ptr = (HTpointer)malloc(sizeof(HTentry));
 	ptr->index = nextid;
 	ptr->next = HT[hscode];
 	HT[hscode] = ptr;
@@ -296,10 +293,16 @@ int main()
 		err = noerror;
 		SkipSeperators();
 		ReadID();
-		if (input != EOF && err != illid && err != toolong) {
+		if (input != EOF && err != illid) {
 			if (nextfree == STsize) {
 				err = overst;
 				PrintError(err);
+			}
+			if (nextfree - nextid > 12) { // Check if identifier is too long
+				err = toolong;
+				PrintError(err);
+				nextfree = nextid; // Reset nextfree to ignore the too long identifier
+				continue; // Skip adding to hash table
 			}
 			ST[nextfree++] = '\0';
 
@@ -307,21 +310,23 @@ int main()
 			LookupHS(nextid, hashcode);
 
 			if (!found) {
-				printf(" %6d		", nextid);
+				printf("  %6d\t", nextid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
-				printf("	(entered)\n");
+				printf("\t\t(entered)\n");
 				ADDHT(hashcode);
 			}
 			else {
-				printf(" %6d		", sameid);
+				printf("  %6d\t", sameid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
-				printf("	(already existed)\n");
+				printf("\t\t(already existed)\n");
 				nextfree = nextid;
 			}
 		}
 	}
 	PrintHStable();
 	PrintTeam();
+
+	return 0;
 }
