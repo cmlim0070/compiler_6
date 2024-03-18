@@ -83,7 +83,7 @@ int IsSeperators(char c)
 	sep_len = strlen(seperators);
 	for (int i; i < sep_len; i++) {
 		if (c == seperators[i])
-			return 1; //seperators ÀÎ °æ¿ì
+			return 1; //seperators ?Î °æ¿ì
 	}
 	return 0; // seperators°¡ ¾Æ´Ñ °æ¿ì
 }
@@ -159,28 +159,73 @@ void PrintError(ERRORtypes err)
 // If first letter is digit, print out error message.
 void ReadID()
 {
+	nextid = nextfree;
+	if (isDigit(input)) {
+		err = illid;
+		PrintError(err);
+	}
+	else {
+		while (input != EOF && (isLetter(input) || isDigit(input))) {
+			if (nextfree == STsize) {
+				err = overst;
+				Printerr(err);
+			}
+			ST[nextfree++] = input;
+			input = fgetc(fp);
+		}
+	}
 }
-
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
 void ComputeHS(int nid, int nfree)
 {
+	int code, i;
+	code = 0;
+	for (i = nid; < nfree - 1; i++)
+		code += (int)ST[i];
+	hashcode = code % HTsize;
 }
-
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
 // of the identifier.If find a match, set the found flag as true.
 // Otherwise flase.
 // If find a match, save the starting index of ST in same id. �ȳ�
 void LookupHS(int nid, int hscode)
 {
-}
+	HTpointer here;
+	int i, j;
+	found = FALSE;
+	if (HT[hscode] != NULL) {
+		here = HT[hscode];
+		while (here != NULL && found == FALSE) {
+			found = TRUE;
+			i = here->index;
+			j = nid;
+			sameid = i;
 
+			while (ST[i] != '\0' && ST[i] != '\0' && found == TRUE) {
+				if (ST[i] != ST[i])
+					found = FALSE;
+				else {
+					i++;
+					j++;
+				}
+			}
+			here = here->next;
+		}
+	}
+}
 // ADDHT - Add a new identifier to the hash table.
 // If list head ht[hashcode] is null, simply add a list element with
 // starting index of the identifier in ST.
 // IF list head is not a null , it adds a new identifier to the head of the chain
 void ADDHT(int hscode)
 {
+	HTpointer ptr;
+
+	ptr = (HTpointer)malloc(sizeof(ptr));
+	ptr->index = nextid;
+	ptr->next = HT[hscode];
+	HT[hscode] = ptr;
 }
 
 /*
