@@ -34,8 +34,9 @@ seperators - null , . ; : ? ! \t \n
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#pragma warning(disable:4996)
 
-#define FILE_NAME "testdata5.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata44.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -73,7 +74,7 @@ char input;
 
 //PrintHeading - Print heading
 void PrintHeading() {
-	printf("\n [[ CURRENT FILE ]]\n %\s\n\n\n\n", FILE_NAME);
+	printf("\n[[ CURRENT FILE ]]\n %s\n\n\n", FILE_NAME);
 	printf(" [[ STRING TABLE ]]\n");
 	printf(" -------------- ------------\n");
 	printf(" Index in ST	identifier\n");
@@ -135,28 +136,37 @@ void PrintError(ERRORtypes err)
 {
 	switch (err) {
 	case overst:
-		printf(" ...ERROR...		OVERFLOW\n");
+		printf("...ERROR...		OVERFLOW\n");
 		PrintHStable();
 		exit(0);
 		break;
 	case illid:
-		printf(" ...ERROR...	");
+		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
 			input = fgetc(fp);
 		}
-		printf("	start with digit \n");
+		printf("\t\tstart with digit \n");
 		break;
 	case illsp:
-		printf(" ...ERROR...	");
+		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
-			printf("%c", input);
 			input = fgetc(fp);
 		}
-		printf("	%c is not allowed \n", input);
+		printf("%c", input);
+		printf("\t\t%c is not allowed \n", input);
 		break;
 	case toolong:
-		printf("too long identifier");
+		printf(" ...ERROR...\t");
+		int length = 12;
+		int i = 0;
+		while (input != EOF && !(IsSeperators(input)) && (isLetter(input) || isDigit(input))) {
+			ST[nextfree++] = input;
+			input = fgetc(fp);
+			length++;
+		}
+		printf("%.*s", nextfree - nextid, &ST[nextid]);
+		printf("\ttoo long identifier\n");
 		break;
 	}
 }
@@ -166,8 +176,10 @@ void PrintError(ERRORtypes err)
 // if illegal seperators, print out error message.
 void SkipSeperators()
 {
-	while (input != EOF && !(isLetter(input) || isDigit(input))) { //EOF도 아니고 letters와 digit도 아닐 때
-		if (!IsSeperators(input)) { //
+	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		//if EOF도 아니고 letters와 digit도 아닐 때
+		if (!IsSeperators(input)) {
+			//
 			err = illsp;
 			PrintError(err);
 		}
@@ -185,7 +197,7 @@ void ReadID()
 	int length = 0;
 
 	if (isDigit(input)) { //숫자로 시작하는지 체크
-		err = illid; 
+		err = illid;
 		PrintError(err);
 	}
 	else {
@@ -193,11 +205,6 @@ void ReadID()
 			if (nextfree == STsize) { //overflow
 				err = overst;
 				PrintError(err);
-			}
-			if (length >= 12) {
-				err = toolong;
-				PrintError(err);
-				return;
 			}
 			ST[nextfree++] = input;
 			length++;
@@ -212,7 +219,7 @@ void ComputeHS(int nid, int nfree)
 {
 	int code, i;
 	code = 0;
-	for (i = nid; i< nfree - 1; i++)
+	for (i = nid; i < nfree - 1; i++)
 		code += (int)ST[i];
 	hashcode = code % HTsize;
 }
@@ -256,7 +263,7 @@ void ADDHT(int hscode)
 {
 	HTpointer ptr;
 
-	ptr = (HTpointer)malloc(sizeof(ptr));
+	ptr = (HTpointer)malloc(sizeof(HTentry));
 	ptr->index = nextid;
 	ptr->next = HT[hscode];
 	HT[hscode] = ptr;
@@ -293,27 +300,35 @@ int main()
 				err = overst;
 				PrintError(err);
 			}
+			if (nextfree - nextid > 12) { // Check if identifier is too long
+				err = toolong;
+				PrintError(err);
+				nextfree = nextid; // Reset nextfree to ignore the too long identifier
+				continue; // Skip adding to hash table
+			}
 			ST[nextfree++] = '\0';
 
 			ComputeHS(nextid, nextfree);
 			LookupHS(nextid, hashcode);
 
 			if (!found) {
-				printf(" %6d		", nextid);
+				printf("  %6d\t", nextid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
-				printf("	(entered)\n");
+				printf("\t\t(entered)\n");
 				ADDHT(hashcode);
 			}
 			else {
-				printf(" %6d		", sameid);
+				printf("  %6d\t", sameid);
 				for (i = nextid; i < nextfree - 1; i++)
 					printf("%c", ST[i]);
-				printf("	(already existed)\n");
+				printf("\t\t(already existed)\n");
 				nextfree = nextid;
 			}
 		}
 	}
 	PrintHStable();
 	PrintTeam();
+
+	return 0;
 }
