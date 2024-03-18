@@ -42,6 +42,7 @@ seperators - null , . ; : ? ! \t \n
 #define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'z') )
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
+//
 typedef struct HTentry* HTpointer;
 typedef struct HTentry {
 	int index; //index of identifier in ST
