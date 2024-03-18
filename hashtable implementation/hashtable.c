@@ -35,10 +35,10 @@ seperators - null , . ; : ? ! \t \n
 #include <stdlib.h>
 #include <string.h>
 
-#define FILE_NAME "testdata5.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata5.txt" // name of test data file(.txt format) to run
 
-#define STsize 1000 //size of string table
-#define HTsize 100 //size of hash table
+#define STsize 1000 // size of string table
+#define HTsize 100 // size of hash table
 
 #define FALSE 0
 #define TRUE 1
@@ -60,18 +60,19 @@ char seperators[] = " .,;:?!\t\n";
 HTpointer HT[HTsize];
 char ST[STsize];
 
-int nextid = 0;		//current identifier
-int nextfree = 0;	//the next available index of ST
-int hashcode;		//hash code of identifier
-int sameid;		//first index of identifier
+int nextid = 0;		// current identifier
+int nextfree = 0;	// the next available index of ST
+int hashcode;		// hash code of identifier
+int sameid;		// first index of identifier
 
-int found; //for the previos occurence of identifier
+int len;	// to check the length of the identifier -> toolong err
+int found; // for the previos occurence of identifier
 
 ERRORtypes err;
-FILE* fp; //to be a pointer to FILE
+FILE* fp; // to be a pointer to FILE
 char input;
 
-//PrintHeading - Print heading
+// PrintHeading - Print heading
 void PrintHeading() {
 	printf("\n [[ CURRENT FILE ]]\n %\s\n\n\n\n", FILE_NAME);
 	printf(" [[ STRING TABLE ]]\n");
@@ -81,14 +82,14 @@ void PrintHeading() {
 }
 
 //Initialize - open input file
-//read one character from file
+// read one character from file
 void initialize()
 {
 	fp = fopen(FILE_NAME, "r");
 	input = fgetc(fp);
 }
 
-//IsSeperators - distinguish the seperator
+// IsSeperators - distinguish the seperator
 int IsSeperators(char c)
 {
 	int sep_len;
@@ -122,7 +123,7 @@ void PrintHStable()
 			}
 			printf("\n");
 		}
-	printf("\n < %5d characters are used in the string table > \n", nextfree);
+	printf("\n < %5d characters are used in the string table     > \n", nextfree);
 }
 
 // PrintError - Print out error messages
@@ -153,10 +154,16 @@ void PrintError(ERRORtypes err)
 			printf("%c", input);
 			input = fgetc(fp);
 		}
-		printf("	%c is not allowed \n", input);
+//		printf("	%c is not allowed \n", input);
+		printf("%c	invalid seperator \n", input);
 		break;
 	case toolong:
-		printf("too long identifier");
+		printf(" ...ERROR...	");
+		for (int i = nextid; i <= nextfree; i++) {
+			printf("%c", ST[i]);
+		}
+		nextfree = nextid;
+		printf("	too long identifier\n");
 		break;
 	}
 }
@@ -166,8 +173,8 @@ void PrintError(ERRORtypes err)
 // if illegal seperators, print out error message.
 void SkipSeperators()
 {
-	while (input != EOF && !(isLetter(input) || isDigit(input))) { //EOF도 아니고 letters와 digit도 아닐 때
-		if (!IsSeperators(input)) { //
+	while (input != EOF && !(isLetter(input) || isDigit(input))) { // EOF도 아니고 letters와 digit도 아닐 때
+		if (!IsSeperators(input)) { // seperator 조차 아닌 경우
 			err = illsp;
 			PrintError(err);
 		}
@@ -175,35 +182,36 @@ void SkipSeperators()
 	}
 }
 
-//ReadIO - Read identifier from the input file the string table ST directly into
+// ReadIO - Read identifier from the input file the string table ST directly into
 // ST(append it to the previous identifier).
 // An identifier is a string of letters and digits, starting with a letter.
 // If first letter is digit, print out error message.
 void ReadID()
 {
 	nextid = nextfree;
-	int length = 0;
+	len = 0;
 
-	if (isDigit(input)) { //숫자로 시작하는지 체크
+	if (isDigit(input)) { // 숫자로 시작하는지 체크
 		err = illid; 
 		PrintError(err);
 	}
 	else {
-		while (input != EOF && (isLetter(input) || isDigit(input))) { //valid character
-			if (nextfree == STsize) { //overflow
+		while (input != EOF && (isLetter(input) || isDigit(input))) { // valid character
+			if (nextfree == STsize) { // overflow
 				err = overst;
 				PrintError(err);
 			}
-			if (length >= 12) {
-				err = toolong;
-				PrintError(err);
-				return;
-			}
 			ST[nextfree++] = input;
-			length++;
+			len++;
 			input = fgetc(fp);
 		}
-	}
+
+		if (len >= 12) {
+			err = toolong;
+			PrintError(err);
+			return;
+		}
+	}	
 }
 
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
@@ -251,7 +259,7 @@ void LookupHS(int nid, int hscode)
 // ADDHT - Add a new identifier to the hash table.
 // If list head ht[hashcode] is null, simply add a list element with
 // starting index of the identifier in ST.
-// IF list head is not a null , it adds a new identifier to the head of the chain
+// If list head is not a null , it adds a new identifier to the head of the chain
 void ADDHT(int hscode)
 {
 	HTpointer ptr;
@@ -262,7 +270,7 @@ void ADDHT(int hscode)
 	HT[hscode] = ptr;
 }
 
-//PrintTeam - Print a team members.
+// PrintTeam - Print a team members.
 void PrintTeam() {
 	printf("\n\n\n [[ 컴파일러 6조 ]]");
 	printf("\n 1976002 강민아, 1976333 임채민, 1985086 임은지, 1971091 Nafisa\n\n");
@@ -288,7 +296,7 @@ int main()
 		err = noerror;
 		SkipSeperators();
 		ReadID();
-		if (input != EOF && err != illid) {
+		if (input != EOF && err != illid && err != toolong) {
 			if (nextfree == STsize) {
 				err = overst;
 				PrintError(err);
