@@ -19,7 +19,7 @@ An identifier is a string of letters and digits,starting with a letter.
 Output :
 The identifier,its index in the stringtable and whether entered or present.
 Prints error message for illegal identifier(starting with a digit),illegal seperator and
-:
+
 Restriction:
 If the ST overflows, print the hashtable as above, and abort by calling
 the function "exit()". "exit()" terminates the execution of a program.
@@ -35,7 +35,7 @@ seperators - null , . ; : ? ! \t \n
 #include <stdlib.h>
 #include <string.h>
 
-#define FILE_NAME "testdata4.txt" //name of test data file(.txt) to run
+#define FILE_NAME "testdata5.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -43,9 +43,8 @@ seperators - null , . ; : ? ! \t \n
 #define FALSE 0
 #define TRUE 1
 
-#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z') )
+#define isLetter(x) ( ((x) >= 'a' && (x) <= 'z') || ((x) >= 'A' && (x) <= 'Z'))
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
-
 
 typedef struct HTentry *HTpointer;
 typedef struct HTentry {
@@ -56,29 +55,31 @@ typedef struct HTentry {
 enum errorTypes { noerror, illsp, illid, overst, toolong};
 typedef enum errorTypes ERRORtypes;
 
-char seperators[] = " .,;:?!\t\n";
+char seperators[] = " .,;:?!\t\n";	
 
 HTpointer HT[HTsize];
 char ST[STsize];
 
-int nextid = 0;
-int nextfree = 0;
-int hashcode;
-int sameid;
+int nextid = 0;		//current identifier
+int nextfree = 0;	//the next available index of ST
+int hashcode;		//hash code of identifier
+int sameid;		//first index of identifier
 
-int found; //for the previos occurence of identifier'
+int found; //for the previos occurence of identifier
 
 ERRORtypes err;
 FILE* fp; //to be a pointer to FILE
 char input;
 
 //Initialize - open input file
+//read one character from file
 void initialize()
 {
 	fp = fopen(FILE_NAME, "r");
 	input = fgetc(fp);
 }
 
+//IsSeperators - distinguish the seperator
 int IsSeperators(char c)
 {
 	int sep_len;
@@ -92,7 +93,7 @@ int IsSeperators(char c)
 }
 
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
-// associated with each hashcode,but only for non-empty lists.
+// associated with each hashcode, but only for non-empty lists.
 // Print out the number of characters used up in ST.
 void PrintHStable()
 {
@@ -117,27 +118,33 @@ void PrintHStable()
 
 // PrintError - Print out error messages
 // overst : overflow in ST
-// print the hashtable and terminate by calling the function "exit(0)".
+//			print the hashtable and terminate by calling the function "exit(0)".
 // illid : illegal identifier
 // illsp :illegal seperator
+// toolong : length of identifier is over 12
 void PrintError(ERRORtypes err)
 {
 	switch (err) {
 	case overst:
-		printf("Overflow in ST\n");
+		printf("...ERROR...		OVERFLOW\n");
 		PrintHStable();
 		exit(0);
 		break;
 	case illid:
-		printf("illigal seperator");
+		printf("...ERROR...	");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
 			input = fgetc(fp);
 		}
-		printf("start with digit \n");
+		printf("	start with digit \n");
 		break;
 	case illsp:
-		printf("%c is illegal seperator\n", input);
+		printf("...ERROR...	");
+		while (input != EOF && (isLetter(input) || isDigit(input))) {
+			printf("%c", input);
+			input = fgetc(fp);
+		}
+		printf("	%c is not allowed \n", input);
 		break;
 	case toolong:
 		printf("too long identifier");
@@ -145,13 +152,15 @@ void PrintError(ERRORtypes err)
 	}
 }
 
-
 // Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
-// if illegal seperators,print out error message.
+// use seperators[]
+// if illegal seperators, print out error message.
 void SkipSeperators()
 {
 	while (input != EOF && !(isLetter(input) || isDigit(input))) {
+		//if EOF도 아니고 letters와 digit도 아닐 때
 		if (!IsSeperators(input)) {
+			//
 			err = illsp;
 			PrintError(err);
 		}
@@ -166,22 +175,30 @@ void SkipSeperators()
 void ReadID()
 {
 	nextid = nextfree;
-		if (isDigit(input)) { //숫자로 시작하는지 체크
-			err = illid; // 숫자로 시작하면 isDigit 뱉음
-			PrintError(err);
-		}
-		else {
-			while (input != EOF && (isLetter(input) || isDigit(input))) {
-				if (nextfree == STsize) {
-					err = overst;
-					PrintError(err);
-				}
-				ST[nextfree++] = input;
-				input = fgetc(fp);
+	int length = 0;
+
+	if (isDigit(input)) { //숫자로 시작하는지 체크
+		err = illid; 
+		PrintError(err);
+	}
+	else {
+		while (input != EOF && (isLetter(input) || isDigit(input))) { //valid character
+			if (nextfree == STsize) { //overflow
+				err = overst;
+				PrintError(err);
 			}
+			if (length >= 12) {
+				err = toolong;
+				PrintError(err);
+				return;
+			}
+			ST[nextfree++] = input;
+			length++;
+			input = fgetc(fp);
 		}
-	
+	}
 }
+
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
 void ComputeHS(int nid, int nfree)
@@ -192,6 +209,7 @@ void ComputeHS(int nid, int nfree)
 		code += (int)ST[i];
 	hashcode = code % HTsize;
 }
+
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
 // of the identifier.If find a match, set the found flag as true.
 // Otherwise flase.
@@ -200,6 +218,7 @@ void LookupHS(int nid, int hscode)
 {
 	HTpointer here;
 	int i, j;
+
 	found = FALSE;
 	if (HT[hscode] != NULL) {
 		here = HT[hscode];
@@ -241,20 +260,29 @@ void PrintTeam() {
 	printf("1976002 강민아, 1976333 임채민, 1985086 임은지, 1971091 Nafisa");
 }
 
+//PrintHeading - Print heading
+void PrintHeading() {
+	printf("-------------- ------------\n");
+	printf("Index in ST	identifier\n");
+	printf("-------------- ------------\n");
+}
+
 /*
 *  MAIN - Read the identifier from the file directly into ST.
 Compute its hashcode.
 Look up the idetifier in hashtable HT[hashcode]
-If matched, delete the identifier from STand print ST - index
+If matched, delete the identifier from ST and print ST - index
 of the matching identifier.
 If not matched, add a new element to the list, pointing to new identifier.
-Print the identifier, its index in ST, and whether it was entered or present.
+Print the identifier, its index in ST, and whether it was (entered) or (already existed) or errortype.
 Print out the hashtable, and number of characters used up in ST
 */
 int main()
 {
 	int i;
+	PrintHeading();
 	initialize();
+
 	while (input != EOF) {
 		err = noerror;
 		SkipSeperators();
