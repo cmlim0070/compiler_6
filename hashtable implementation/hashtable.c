@@ -44,7 +44,7 @@ seperators - null , . ; : ? ! \t \n
 #define isDigit(x) ( (x) >= '0' && (x) <= '9' )
 
 
-typedef struct HTentry* HTpointer;
+typedef struct HTentry *HTpointer;
 typedef struct HTentry {
 	int index; //index of identifier in ST
 	HTpointer next; //pointer to next identifier
@@ -75,6 +75,7 @@ void initialize()
 	fp = fopen(FILE_NAME, "r");
 	input = fgetc(fp);
 }
+
 int IsSeperators(char c)
 {
 	int sep_len;
@@ -82,10 +83,12 @@ int IsSeperators(char c)
 	sep_len = strlen(seperators);
 	for (int i; i < sep_len; i++) {
 		if (c == seperators[i])
-			return 1; //seperators ÀÎ °æ¿ì
+			return 1; //seperators Ã€ÃŽ Â°Ã¦Â¿Ã¬
 	}
-	return 0; // seperators°¡ ¾Æ´Ñ °æ¿ì
+	return 0; // seperatorsÂ°Â¡ Â¾Ã†Â´Ã‘ Â°Ã¦Â¿Ã¬
 }
+
+
 // Skip Seperators - skip over strings of spaces,tabs,newlines, . , ; : ? !
 // if illegal seperators,print out error message.
 void SkipSeperators(char c)
@@ -98,12 +101,31 @@ void SkipSeperators(char c)
 		input = fgetc(fp);
 	}
 }
+
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
 // associated with each hashcode,but only for non-empty lists.
 // Print out the number of characters used up in ST.
 void PrintHStable()
 {
+	int i, j;
+	HTpointer here;
+
+	printf("\n\n\n\n\n [[ HASH TABLE ]] \n\n");
+
+	for (i = 0; i < HTsize; i++)
+		if (HT[i] != NULL) {
+			printf(" Hash Code %3d: ", i);
+			for (here = HT[i]; here != NULL; here = here->next) {
+				j = here->index;
+				while (ST[j] != '\0' && j < STsize)
+					printf("%c", ST[j++]);
+				printf("   ");
+			}
+			printf("\n");
+		}
+	printf("\n\n\n < %5d characters are used in the string table > \n", nextfree);
 }
+
 // PrintError - Print out error messages
 // overst : overflow in ST
 // print the hashtable and abort by calling the function "abort()".
@@ -138,11 +160,13 @@ void PrintError(ERRORtypes err)
 void ReadID()
 {
 }
+
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
 void ComputeHS(int nid, int nfree)
 {
 }
+
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
 // of the identifier.If find a match, set the found flag as true.
 // Otherwise flase.
@@ -150,6 +174,7 @@ void ComputeHS(int nid, int nfree)
 void LookupHS(int nid, int hscode)
 {
 }
+
 // ADDHT - Add a new identifier to the hash table.
 // If list head ht[hashcode] is null, simply add a list element with
 // starting index of the identifier in ST.
@@ -157,7 +182,9 @@ void LookupHS(int nid, int hscode)
 void ADDHT(int hscode)
 {
 }
-// MAIN - Read the identifier from the file directly into ST.
+
+/*
+*  MAIN - Read the identifier from the file directly into ST.
 Compute its hashcode.
 Look up the idetifier in hashtable HT[hashcode]
 If matched, delete the identifier from STand print ST - index
@@ -165,7 +192,7 @@ of the matching identifier.
 If not matched, add a new element to the list, pointing to new identifier.
 Print the identifier, its index in ST, and whether it was entered or present.
 Print out the hashtable, and number of characters used up in ST
-//
+*/
 int main()
 {
 	int i;
