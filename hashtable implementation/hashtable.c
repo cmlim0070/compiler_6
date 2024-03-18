@@ -170,7 +170,7 @@ void ComputeHS(int nid, int nfree)
 // LookupHS -For each identifier,Look it up in the hashtable for previous occurrence
 // of the identifier.If find a match, set the found flag as true.
 // Otherwise flase.
-// If find a match, save the starting index of ST in same id.
+// If find a match, save the starting index of ST in same id. ¾È³ç
 void LookupHS(int nid, int hscode)
 {
 }
