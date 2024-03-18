@@ -53,7 +53,7 @@ typedef struct HTentry {
 	HTpointer next; //pointer to next identifier
 } HTentry;
 
-enum errorTypes { noerror, illsp, illid, overst };
+enum errorTypes { noerror, illsp, illid, overst, toolong};
 typedef enum errorTypes ERRORtypes;
 
 char seperators[] = " .,;:?!\t\n";
@@ -139,6 +139,9 @@ void PrintError(ERRORtypes err)
 	case illsp:
 		printf("%c is illegal seperator\n", input);
 		break;
+	case toolong:
+		printf("too long identifier");
+		break;
 	}
 }
 
@@ -163,18 +166,24 @@ void SkipSeperators()
 void ReadID()
 {
 	nextid = nextfree;
-	if (isDigit(input)) {
-		err = illid;
+	if (strlen(input) > 12) { //12자 이내
+		err = toolong;
 		PrintError(err);
 	}
 	else {
-		while (input != EOF && (isLetter(input) || isDigit(input))) {
-			if (nextfree == STsize) {
-				err = overst;
-				PrintError(err);
+		if (isDigit(input)) { //숫자로 시작하는지 체크
+			err = illid; // 숫자로 시작하면 isDigit 뱉음
+			PrintError(err);
+		}
+		else {
+			while (input != EOF && (isLetter(input) || isDigit(input))) {
+				if (nextfree == STsize) {
+					err = overst;
+					PrintError(err);
+				}
+				ST[nextfree++] = input;
+				input = fgetc(fp);
 			}
-			ST[nextfree++] = input;
-			input = fgetc(fp);
 		}
 	}
 }
