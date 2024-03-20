@@ -36,7 +36,7 @@ seperators - null , . ; : ? ! \t \n
 #include <string.h>
 #pragma warning(disable:4996)
 
-#define FILE_NAME "testdata2.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata4.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -196,6 +196,7 @@ void ReadID() {
 	nextid = nextfree;
 	if (isDigit(input)) {
 		err = illid;
+		PrintError(err);
 	}
 	else {
 		while (input != EOF && !IsSeperators(input)) {
@@ -302,15 +303,16 @@ int main()
 		SkipSeperators();
 		ReadID();
 		if (input != EOF && err != illid) {
-			if (nextfree == STsize) {
+
+			if (nextfree == STsize) { // Check overflow
 				err = overst;
 				PrintError(err);
 			}
 			if (nextfree - nextid > 12) { // Check if identifier is too long
 				err = toolong;
 				PrintError(err);
-				nextfree = nextid; // Reset nextfree to ignore the too long identifier
-				continue; // Skip adding to hash table
+				nextfree = nextid;
+				continue; 
 			}
 			if (err == illsp) { // Check invalid seperator
 				PrintError(err);
