@@ -36,7 +36,7 @@ seperators - null , . ; : ? ! \t \n
 #include <string.h>
 #pragma warning(disable:4996)
 
-#define FILE_NAME "testdata44.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata2.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -97,10 +97,12 @@ int IsSeperators(char c)
 
 	sep_len = strlen(seperators);
 	for (int i=0; i < sep_len; i++) {
-		if (c == seperators[i])
-			return 1; // valid seperators 
+		if (c == seperators[i]) {
+			return 1; // valid seperators
+		} 
 	}
-	return 0; // invalid seperators
+
+	return 0; // invalid seperators + number + letter
 }
 
 // PrintHStable - Prints the hash table.write out the hashcode and the list of identifiers
@@ -152,20 +154,17 @@ void PrintError(ERRORtypes err)
 	case illsp:
 		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
+			ST[nextfree++] = input;
 			input = fgetc(fp);
 		}
-		for (int i = nextid; i < nextfree; i++)
-			printf("%c", ST[i]);
+		printf("%.*s", nextfree - nextid, &ST[nextid]);
 		printf("\t%c is not allowed \n", buffer);
 		break;
 	case toolong:
 		printf(" ...ERROR...\t");
-		int length = 12;
-		int i = 0;
 		while (input != EOF && !(IsSeperators(input)) && (isLetter(input) || isDigit(input))) {
 			ST[nextfree++] = input;
 			input = fgetc(fp);
-			length++;
 		}
 		printf("%.*s", nextfree - nextid, &ST[nextid]);
 		printf("\ttoo long identifier\n");
@@ -181,9 +180,8 @@ void SkipSeperators()
 	while (input != EOF && !(isLetter(input) || isDigit(input))) {
 		//if EOF도 아니고 letters와 digit도 아닐 때
 		if (!IsSeperators(input)) {
-			//
 			err = illsp;
-			PrintError(err);
+			break;
 		}
 		input = fgetc(fp);
 	}
@@ -196,11 +194,10 @@ void SkipSeperators()
 
 void ReadID() {
 	nextid = nextfree;
-	int length = 0;
 	//숫자로 시작하는지 체크
 	if (isDigit(input)) {
 		err = illid;
-		PrintError(err);
+		//PrintError(err);
 	}
 	else {
 		while (input != EOF && !IsSeperators(input)) {
@@ -208,15 +205,14 @@ void ReadID() {
 				if (nextfree == STsize) { //오버플로우 체크
 					nextfree = nextid;
 					err = overst;
-					PrintError(err);
+					//PrintError(err);
 				}
 				ST[nextfree++] = input;
-				length++;
 			}
 			else {
 				err = illsp;
-				ST[nextfree++] = input;
 				buffer = input;
+				ST[nextfree++] = input;
 			}
 			input = fgetc(fp);
 		}
@@ -322,7 +318,6 @@ int main()
 				nextfree = nextid;
 				continue;
 			}
-
 			/*if (err != noerror) continue;*/
 
 			ST[nextfree++] = '\0';
