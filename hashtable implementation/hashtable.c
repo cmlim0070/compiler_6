@@ -36,7 +36,7 @@ seperators - null , . ; : ? ! \t \n
 #include <string.h>
 #pragma warning(disable:4996)
 
-#define FILE_NAME "testdata3.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata44.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 //size of string table
 #define HTsize 100 //size of hash table
@@ -302,7 +302,7 @@ int main()
 	PrintHeading();
 	initialize();
 
-	while (input) {
+	while (input != EOF) {
 		err = noerror;
 		SkipSeperators();
 		ReadID();
@@ -319,6 +319,7 @@ int main()
 			}
 			if (err == illsp) {
 				PrintError(err);
+				nextfree = nextid;
 				continue;
 			}
 
@@ -343,28 +344,6 @@ int main()
 				printf("\t\t(already existed)\n");
 				nextfree = nextid;
 			}
-		}
-		if (input == EOF) {
-			PrintError(err);
-
-			ComputeHS(nextid, nextfree);
-			LookupHS(nextid, hashcode);
-
-			if (!found) {
-				printf("  %6d\t", nextid);
-				for (i = nextid; i < nextfree - 1; i++)
-					printf("%c", ST[i]);
-				printf("\t\t(entered)\n");
-				ADDHT(hashcode);
-			}
-			else {
-				printf("  %6d\t", sameid);
-				for (i = nextid; i < nextfree - 1; i++)
-					printf("%c", ST[i]);
-				printf("\t\t(already existed)\n");
-				nextfree = nextid;
-			}
-			break;
 		}
 	}
 	PrintHStable();
