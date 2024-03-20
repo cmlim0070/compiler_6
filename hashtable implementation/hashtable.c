@@ -1,7 +1,7 @@
 /*******************************************************************************************************************************
 Hashtable Implementation (STsize = 1000)
 Programmer : Kang Mina, Lim Chaemin, Lim Eunjee, Nafisa
-Date: 3/ 18/ 2024
+Date: 3/ 20/ 2024
 
 Description :
 The input to the program is a file , consisting of identifiers seperated by
@@ -71,7 +71,8 @@ int found; //for the previos occurence of identifier
 ERRORtypes err;
 FILE* fp; //to be a pointer to FILE
 char input;
-char buffer;
+
+char buffer; //save invalid seperators
 
 //PrintHeading - Print heading
 void PrintHeading() {
@@ -138,12 +139,12 @@ void PrintHStable()
 void PrintError(ERRORtypes err)
 {
 	switch (err) {
-	case overst:
+	case overst: // overflow
 		printf("...ERROR...		OVERFLOW\n");
 		PrintHStable();
 		exit(0);
 		break;
-	case illid:
+	case illid: // start with digit
 		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			printf("%c", input);
@@ -151,16 +152,16 @@ void PrintError(ERRORtypes err)
 		}
 		printf("\t\tstart with digit \n");
 		break;
-	case illsp:
+	case illsp: // invalid seperators
 		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			ST[nextfree++] = input;
 			input = fgetc(fp);
 		}
 		printf("%.*s", nextfree - nextid, &ST[nextid]);
-		printf("\t%c is not allowed \n", buffer);
+		printf("\t%c is not allowed \n", buffer); // print invalid seperator
 		break;
-	case toolong:
+	case toolong: // too long string
 		printf(" ...ERROR...\t");
 		while (input != EOF && !(IsSeperators(input)) && (isLetter(input) || isDigit(input))) {
 			ST[nextfree++] = input;
@@ -178,8 +179,7 @@ void PrintError(ERRORtypes err)
 void SkipSeperators()
 {
 	while (input != EOF && !(isLetter(input) || isDigit(input))) {
-		//if EOF도 아니고 letters와 digit도 아닐 때
-		if (!IsSeperators(input)) {
+		if (!IsSeperators(input)) { // invalid seperator
 			err = illsp;
 			break;
 		}
@@ -194,10 +194,8 @@ void SkipSeperators()
 
 void ReadID() {
 	nextid = nextfree;
-	//숫자로 시작하는지 체크
 	if (isDigit(input)) {
 		err = illid;
-		//PrintError(err);
 	}
 	else {
 		while (input != EOF && !IsSeperators(input)) {
@@ -205,7 +203,7 @@ void ReadID() {
 				if (nextfree == STsize) { //오버플로우 체크
 					nextfree = nextid;
 					err = overst;
-					//PrintError(err);
+					PrintError(err);
 				}
 				ST[nextfree++] = input;
 			}
@@ -278,12 +276,12 @@ void ADDHT(int hscode)
 
 //PrintTeam - Print a team members.
 void PrintTeam() {
-	printf("\n\n\n [[ 컴파일러 6조 ]]");
+	printf("\n[[ 컴파일러 6조 ]]");
 	printf("\n 1976002 강민아, 1976333 임채민, 1985086 임은지, 1971091 Nafisa\n\n");
 }
 
 /*
-*  MAIN - Read the identifier from the file directly into ST.
+MAIN - Read the identifier from the file directly into ST.
 Compute its hashcode.
 Look up the idetifier in hashtable HT[hashcode]
 If matched, delete the identifier from ST and print ST - index
@@ -295,6 +293,7 @@ Print out the hashtable, and number of characters used up in ST
 int main()
 {
 	int i;
+	PrintTeam();
 	PrintHeading();
 	initialize();
 
@@ -313,12 +312,11 @@ int main()
 				nextfree = nextid; // Reset nextfree to ignore the too long identifier
 				continue; // Skip adding to hash table
 			}
-			if (err == illsp) {
+			if (err == illsp) { // Check invalid seperator
 				PrintError(err);
 				nextfree = nextid;
 				continue;
 			}
-			/*if (err != noerror) continue;*/
 
 			ST[nextfree++] = '\0';
 
@@ -342,7 +340,6 @@ int main()
 		}
 	}
 	PrintHStable();
-	PrintTeam();
 
 	return 0;
 }
