@@ -301,7 +301,7 @@ int main()
 	PrintHeading();
 	initialize();
 
-	while (input != EOF) {
+	while (input) {
 		err = noerror;
 		SkipSeperators();
 		ReadID();
@@ -342,6 +342,28 @@ int main()
 				printf("\t\t(already existed)\n");
 				nextfree = nextid;
 			}
+		}
+		if (input == EOF) {
+			PrintError(err);
+
+			ComputeHS(nextid, nextfree);
+			LookupHS(nextid, hashcode);
+
+			if (!found) {
+				printf("  %6d\t", nextid);
+				for (i = nextid; i < nextfree - 1; i++)
+					printf("%c", ST[i]);
+				printf("\t\t(entered)\n");
+				ADDHT(hashcode);
+			}
+			else {
+				printf("  %6d\t", sameid);
+				for (i = nextid; i < nextfree - 1; i++)
+					printf("%c", ST[i]);
+				printf("\t\t(already existed)\n");
+				nextfree = nextid;
+			}
+			break;
 		}
 	}
 	PrintHStable();
