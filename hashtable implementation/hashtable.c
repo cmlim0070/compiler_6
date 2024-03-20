@@ -34,9 +34,8 @@ seperators - null , . ; : ? ! \t \n
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#pragma warning(disable:4996)
 
-#define FILE_NAME "testdata2.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "error1.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 // size of string table
 #define HTsize 100 // size of hash table
@@ -71,6 +70,7 @@ int found; //for the previos occurence of identifier
 ERRORtypes err;
 FILE* fp; // to be a pointer to FILE
 char input;
+char buffer;
 
 // PrintHeading - Print heading
 void PrintHeading() {
@@ -153,8 +153,9 @@ void PrintError(ERRORtypes err)
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
 			input = fgetc(fp);
 		}
-//		printf("	%c is not allowed \n", input);
-		printf("%c	invalid seperator \n", input);
+		for (int i = nextid; i < nextfree; i++)
+			printf("%c", ST[i]);
+		printf("\t%c is not allowed \n", buffer);
 		break;
 	case toolong:
 		printf(" ...ERROR...\t");
@@ -191,25 +192,36 @@ void SkipSeperators()
 // ST(append it to the previous identifier).
 // An identifier is a string of letters and digits, starting with a letter.
 // If first letter is digit, print out error message.
-void ReadID()
-{
-	nextid = nextfree;
 
-	if (isDigit(input)) { // 숫자로 시작하는지 체크
-		err = illid; 
+void ReadID() {
+	nextid = nextfree;
+	int length = 0;
+	//숫자로 시작하는지 체크
+	if (isDigit(input)) {
+		err = illid;
 		PrintError(err);
 	}
 	else {
-		while (input != EOF && (isLetter(input) || isDigit(input))) { // valid character
-			if (nextfree == STsize) { // overflow
-				err = overst;
-				PrintError(err);
+		while (input != EOF && !IsSeperators(input)) {
+			if (isDigit(input) || isLetter(input)) {
+				if (nextfree == STsize) { //오버플로우 체크
+					nextfree = nextid;
+					err = overst;
+					PrintError(err);
+				}
+				ST[nextfree++] = input;
+				length++;
 			}
-			ST[nextfree++] = input;
+			else {
+				err = illsp;
+				ST[nextfree++] = input;
+				buffer = input;
+			}
 			input = fgetc(fp);
 		}
 	}
 }
+
 
 // ComputeHS - Compute the hash code of identifier by summing the ordinal values of its
 // characters and then taking the sum modulo the size of HT.
@@ -304,6 +316,13 @@ int main()
 				nextfree = nextid; // Reset nextfree to ignore the too long identifier
 				continue; // Skip adding to hash table
 			}
+			if (err == illsp) {
+				PrintError(err);
+				continue;
+			}
+
+			/*if (err != noerror) continue;*/
+
 			ST[nextfree++] = '\0';
 
 			ComputeHS(nextid, nextfree);
