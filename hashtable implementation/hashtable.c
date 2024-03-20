@@ -37,8 +37,8 @@ seperators - null , . ; : ? ! \t \n
 
 #define FILE_NAME "testdata4.txt" //name of test data file(.txt format) to run
 
-#define STsize 1000 // size of string table
-#define HTsize 100 // size of hash table
+#define STsize 30 //size of string table
+#define HTsize 100 //size of hash table
 
 #define FALSE 0
 #define TRUE 1
@@ -72,6 +72,12 @@ FILE* fp; // to be a pointer to FILE
 char input;
 
 char buffer; //save invalid seperators
+
+//PrintTeam - Print a team members.
+void PrintTeam() {
+	printf("\n[[ ì»´íŒŒì¼ëŸ¬ 6ì¡° ]]");
+	printf("\n 1976002 ê°•ë¯¼ì•„, 1976333 ì„ì±„ë¯¼, 1985086 ì„ì€ì§€, 1971091 Nafisa\n\n");
+}
 
 //PrintHeading - Print heading
 void PrintHeading() {
@@ -141,6 +147,7 @@ void PrintError(ERRORtypes err)
 	case overst: // overflow
 		printf("...ERROR...		OVERFLOW\n");
 		PrintHStable();
+		PrintTeam();
 		exit(0);
 		break;
 	case illid: // start with digit
@@ -199,7 +206,7 @@ void ReadID() {
 	else {
 		while (input != EOF && !IsSeperators(input)) {
 			if (isDigit(input) || isLetter(input)) {
-				if (nextfree == STsize) { //¿À¹öÇÃ·Î¿ì Ã¼Å©
+				if (nextfree == STsize) { //ì˜¤ë²„í”Œë¡œìš° ì²´í¬
 					nextfree = nextid;
 					err = overst;
 					PrintError(err);
@@ -273,12 +280,6 @@ void ADDHT(int hscode)
 	HT[hscode] = ptr;
 }
 
-// PrintTeam - Print a team members.
-void PrintTeam() {
-	printf("\n[[ ÄÄÆÄÀÏ·¯ 6Á¶ ]]");
-	printf("\n 1976002 °­¹Î¾Æ, 1976333 ÀÓÃ¤¹Î, 1985086 ÀÓÀºÁö, 1971091 Nafisa\n\n");
-}
-
 /*
 MAIN - Read the identifier from the file directly into ST.
 Compute its hashcode.
@@ -292,7 +293,6 @@ Print out the hashtable, and number of characters used up in ST
 int main()
 {
 	int i;
-	PrintTeam();
 	PrintHeading();
 	initialize();
 
@@ -340,6 +340,7 @@ int main()
 		}
 	}
 	PrintHStable();
+	PrintTeam();
 
 	return 0;
 }
