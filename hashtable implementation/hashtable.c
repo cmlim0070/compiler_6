@@ -34,7 +34,6 @@ seperators - null , . ; : ? ! \t \n
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#pragma warning(disable:4996)
 
 #define FILE_NAME "testdata4.txt" //name of test data file(.txt format) to run
 
@@ -61,28 +60,28 @@ char seperators[] = " .,;:?!\t\n";
 HTpointer HT[HTsize];
 char ST[STsize];
 
-int nextid = 0;		//current identifier
-int nextfree = 0;	//the next available index of ST
-int hashcode;		//hash code of identifier
-int sameid;		//first index of identifier
+int nextid = 0;		// current identifier
+int nextfree = 0;	// the next available index of ST
+int hashcode;		// hash code of identifier
+int sameid;		// first index of identifier
 
 int found; //for the previos occurence of identifier
 
 ERRORtypes err;
-FILE* fp; //to be a pointer to FILE
+FILE* fp; // to be a pointer to FILE
 char input;
 
 char buffer; //save invalid seperators
 
 //PrintTeam - Print a team members.
 void PrintTeam() {
-	printf("\n[[ ÄÄÆÄÀÏ·¯ 6Á¶ ]]");
-	printf("\n 1976002 °­¹Î¾Æ, 1976333 ÀÓÃ¤¹Î, 1985086 ÀÓÀºÁö, 1971091 Nafisa\n\n");
+	printf("\n[[ ì»´íŒŒì¼ëŸ¬ 6ì¡° ]]");
+	printf("\n 1976002 ê°•ë¯¼ì•„, 1976333 ì„ì±„ë¯¼, 1985086 ì„ì€ì§€, 1971091 Nafisa\n\n");
 }
 
 //PrintHeading - Print heading
 void PrintHeading() {
-	printf("\n[[ CURRENT FILE ]]\n %s\n\n\n", FILE_NAME);
+	printf("\n [[ CURRENT FILE ]]\n %s\n\n\n\n", FILE_NAME);
 	printf(" [[ STRING TABLE ]]\n");
 	printf(" -------------- ------------\n");
 	printf(" Index in ST	identifier\n");
@@ -90,14 +89,14 @@ void PrintHeading() {
 }
 
 //Initialize - open input file
-//read one character from file
+// read one character from file
 void initialize()
 {
 	fp = fopen(FILE_NAME, "r");
 	input = fgetc(fp);
 }
 
-//IsSeperators - distinguish the seperator
+// IsSeperators - distinguish the seperator
 int IsSeperators(char c)
 {
 	int sep_len;
@@ -133,7 +132,7 @@ void PrintHStable()
 			}
 			printf("\n");
 		}
-	printf("\n < %5d characters are used in the string table > \n", nextfree);
+	printf("\n < %5d characters are used in the string table     > \n", nextfree);
 }
 
 // PrintError - Print out error messages
@@ -162,7 +161,6 @@ void PrintError(ERRORtypes err)
 	case illsp: // invalid seperators
 		printf(" ...ERROR...\t");
 		while (input != EOF && (isLetter(input) || isDigit(input))) {
-			ST[nextfree++] = input;
 			input = fgetc(fp);
 		}
 		printf("%.*s", nextfree - nextid, &ST[nextid]);
@@ -194,7 +192,7 @@ void SkipSeperators()
 	}
 }
 
-//ReadIO - Read identifier from the input file the string table ST directly into
+// ReadIO - Read identifier from the input file the string table ST directly into
 // ST(append it to the previous identifier).
 // An identifier is a string of letters and digits, starting with a letter.
 // If first letter is digit, print out error message.
@@ -208,7 +206,7 @@ void ReadID() {
 	else {
 		while (input != EOF && !IsSeperators(input)) {
 			if (isDigit(input) || isLetter(input)) {
-				if (nextfree == STsize) { //¿À¹öÇÃ·Î¿ì Ã¼Å©
+				if (nextfree == STsize) { //ì˜¤ë²„í”Œë¡œìš° ì²´í¬
 					nextfree = nextid;
 					err = overst;
 					PrintError(err);
@@ -271,7 +269,7 @@ void LookupHS(int nid, int hscode)
 // ADDHT - Add a new identifier to the hash table.
 // If list head ht[hashcode] is null, simply add a list element with
 // starting index of the identifier in ST.
-// IF list head is not a null , it adds a new identifier to the head of the chain
+// If list head is not a null , it adds a new identifier to the head of the chain
 void ADDHT(int hscode)
 {
 	HTpointer ptr;
