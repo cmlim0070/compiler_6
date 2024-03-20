@@ -34,8 +34,9 @@ seperators - null , . ; : ? ! \t \n
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define FILE_NAME "testdata4.txt" //name of test data file(.txt format) to run
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable:4996)
+#define FILE_NAME "noError1.txt" //name of test data file(.txt format) to run
 
 #define STsize 30 //size of string table
 #define HTsize 100 //size of hash table
