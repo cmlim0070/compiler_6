@@ -36,7 +36,7 @@ seperators - null , . ; : ? ! \t \n
 #include <string.h>
 #pragma warning(disable:4996)
 
-#define FILE_NAME "testdata44.txt" //name of test data file(.txt format) to run
+#define FILE_NAME "testdata2.txt" //name of test data file(.txt format) to run
 
 #define STsize 1000 // size of string table
 #define HTsize 100 // size of hash table
